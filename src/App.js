@@ -12,6 +12,7 @@ function App() {
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('Applied');
   const [date, setDate] = useState('');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     localStorage.setItem('jobjar', JSON.stringify(applications));
@@ -19,11 +20,12 @@ function App() {
 
   function handleAdd() {
     if (!company || !role) return;
-    setApplications([...applications, { company, role, status, date }]);
+    setApplications([...applications, { company, role, status, date, notes }]);
     setCompany('');
     setRole('');
     setStatus('Applied');
     setDate('');
+    setNotes('');
   }
 
   function handleKeyDown(e) {
@@ -47,14 +49,38 @@ function App() {
     if (status === 'Offer') return 'bg-green-100 text-green-700';
   }
 
+  const counts = {
+    total: applications.length,
+    applied: applications.filter(a => a.status === 'Applied').length,
+    interview: applications.filter(a => a.status === 'Interview').length,
+    rejected: applications.filter(a => a.status === 'Rejected').length,
+    offer: applications.filter(a => a.status === 'Offer').length,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900">JobJar</h1>
-          <p className="text-gray-500 mt-1">Total applications: {applications.length}</p>
+          <p className="text-gray-500 mt-1">Track every application. Land the right one.</p>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-5 gap-4 mb-8">
+          {[
+            { label: 'Total', value: counts.total, color: 'bg-white text-gray-700' },
+            { label: 'Applied', value: counts.applied, color: 'bg-blue-50 text-blue-700' },
+            { label: 'Interview', value: counts.interview, color: 'bg-yellow-50 text-yellow-700' },
+            { label: 'Rejected', value: counts.rejected, color: 'bg-red-50 text-red-700' },
+            { label: 'Offer', value: counts.offer, color: 'bg-green-50 text-green-700' },
+          ].map((card) => (
+            <div key={card.label} className={`${card.color} rounded-xl shadow p-5 text-center`}>
+              <p className="text-3xl font-bold">{card.value}</p>
+              <p className="text-sm mt-1 font-medium">{card.label}</p>
+            </div>
+          ))}
         </div>
 
         {/* Form */}
@@ -64,14 +90,14 @@ function App() {
             onChange={(e) => setCompany(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Company name"
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
           <input
             value={role}
             onChange={(e) => setRole(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Role"
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
           <input
             type="date"
@@ -90,6 +116,13 @@ function App() {
             <option>Rejected</option>
             <option>Offer</option>
           </select>
+          <input
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Notes (optional)"
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[160px] focus:outline-none focus:ring-2 focus:ring-violet-400"
+          />
           <button
             onClick={handleAdd}
             className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition"
@@ -107,6 +140,7 @@ function App() {
                 <th className="px-6 py-3 text-left">Company</th>
                 <th className="px-6 py-3 text-left">Role</th>
                 <th className="px-6 py-3 text-left">Status</th>
+                <th className="px-6 py-3 text-left">Notes</th>
                 <th className="px-6 py-3 text-left">Delete</th>
               </tr>
             </thead>
@@ -128,6 +162,7 @@ function App() {
                       <option>Offer</option>
                     </select>
                   </td>
+                  <td className="px-6 py-4 text-gray-500 max-w-xs truncate">{app.notes}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleDelete(index)}
