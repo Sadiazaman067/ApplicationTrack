@@ -2,188 +2,31 @@ import logo from './logo.svg';
 import './App.css';
 
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Navbar from './Navbar';
+import Dashboard from './Dashboard';
+import Analytics from './Analytics';
 
 function App() {
   const [applications, setApplications] = useState(() => {
     const saved = localStorage.getItem('jobjar');
     return saved ? JSON.parse(saved) : [];
   });
-  const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
-  const [status, setStatus] = useState('Applied');
-  const [date, setDate] = useState('');
-  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     localStorage.setItem('jobjar', JSON.stringify(applications));
   }, [applications]);
 
-  function handleAdd() {
-    if (!company || !role) return;
-    setApplications([...applications, { company, role, status, date, notes }]);
-    setCompany('');
-    setRole('');
-    setStatus('Applied');
-    setDate('');
-    setNotes('');
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === 'Enter') handleAdd();
-  }
-
-  function handleDelete(index) {
-    setApplications(applications.filter((_, i) => i !== index));
-  }
-
-  function handleStatusChange(index, newStatus) {
-    const updated = [...applications];
-    updated[index].status = newStatus;
-    setApplications(updated);
-  }
-
-  function statusColor(status) {
-    if (status === 'Applied') return 'bg-blue-100 text-blue-700';
-    if (status === 'Interview') return 'bg-yellow-100 text-yellow-700';
-    if (status === 'Rejected') return 'bg-red-100 text-red-700';
-    if (status === 'Offer') return 'bg-green-100 text-green-700';
-  }
-
-  const counts = {
-    total: applications.length,
-    applied: applications.filter(a => a.status === 'Applied').length,
-    interview: applications.filter(a => a.status === 'Interview').length,
-    rejected: applications.filter(a => a.status === 'Rejected').length,
-    offer: applications.filter(a => a.status === 'Offer').length,
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">JobJar</h1>
-          <p className="text-gray-500 mt-1">Track every application. Land the right one.</p>
-        </div>
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-5 gap-4 mb-8">
-          {[
-            { label: 'Total', value: counts.total, color: 'bg-white text-gray-700' },
-            { label: 'Applied', value: counts.applied, color: 'bg-blue-50 text-blue-700' },
-            { label: 'Interview', value: counts.interview, color: 'bg-yellow-50 text-yellow-700' },
-            { label: 'Rejected', value: counts.rejected, color: 'bg-red-50 text-red-700' },
-            { label: 'Offer', value: counts.offer, color: 'bg-green-50 text-green-700' },
-          ].map((card) => (
-            <div key={card.label} className={`${card.color} rounded-xl shadow p-5 text-center`}>
-              <p className="text-3xl font-bold">{card.value}</p>
-              <p className="text-sm mt-1 font-medium">{card.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Form */}
-        <div className="bg-white rounded-xl shadow p-6 mb-8 flex flex-wrap gap-3">
-          <input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Company name"
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-violet-400"
-          />
-          <input
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Role"
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-violet-400"
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
-          />
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
-          >
-            <option>Applied</option>
-            <option>Interview</option>
-            <option>Rejected</option>
-            <option>Offer</option>
-          </select>
-          <input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Notes (optional)"
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm flex-1 min-w-[160px] focus:outline-none focus:ring-2 focus:ring-violet-400"
-          />
-          <button
-            onClick={handleAdd}
-            className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition"
-          >
-            Add
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">Date</th>
-                <th className="px-6 py-3 text-left">Company</th>
-                <th className="px-6 py-3 text-left">Role</th>
-                <th className="px-6 py-3 text-left">Status</th>
-                <th className="px-6 py-3 text-left">Notes</th>
-                <th className="px-6 py-3 text-left">Delete</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {applications.map((app, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 text-gray-500">{app.date}</td>
-                  <td className="px-6 py-4 font-medium text-gray-900">{app.company}</td>
-                  <td className="px-6 py-4 text-gray-600">{app.role}</td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={app.status}
-                      onChange={(e) => handleStatusChange(index, e.target.value)}
-                      className={`rounded-full px-3 py-1 text-xs font-medium border-0 cursor-pointer ${statusColor(app.status)}`}
-                    >
-                      <option>Applied</option>
-                      <option>Interview</option>
-                      <option>Rejected</option>
-                      <option>Offer</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 max-w-xs truncate">{app.notes}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleDelete(index)}
-                      className="text-red-400 hover:text-red-600 font-bold transition"
-                    >
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {applications.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              No applications yet. Add your first one above!
-            </div>
-          )}
-        </div>
-
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Dashboard applications={applications} setApplications={setApplications} />} />
+          <Route path="/analytics" element={<Analytics applications={applications} />} />
+        </Routes>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 
