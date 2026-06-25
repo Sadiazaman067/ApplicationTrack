@@ -1,8 +1,5 @@
-import logo from './logo.svg';
-import './App.css';
-
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './Navbar';
 import Dashboard from './Dashboard';
 import Analytics from './Analytics';
@@ -18,7 +15,7 @@ function App() {
   }, [applications]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <Routes>
@@ -26,7 +23,7 @@ function App() {
           <Route path="/analytics" element={<Analytics applications={applications} />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
